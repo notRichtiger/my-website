@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>Meine Projekte</title>
     <style>
+      <script>
+  document.addEventListener('mousemove', function(e) {
+    const x = (e.clientX / window.innerWidth) * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+    
+    document.body.style.background = `radial-gradient(circle at ${x}% ${y}%, #0f3460, #1a1a2e)`;
+  });
+</script>
       body {
         background-color: #1a1a2e;
         color: white;
