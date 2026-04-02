@@ -2,7 +2,7 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8">
-    <title>Über mich</title>
+    <title>About me</title>
     <style>
       body {
         background-color: #1a1a2e;
@@ -12,29 +12,41 @@
         padding: 50px;
       }
 
-      h1 {
-        color: #e94560;
-        font-size: 3em;
-      }
+      h1 { color: #e94560; font-size: 3em; }
+      p { font-size: 1.2em; color: #a8a8b3; }
 
-      p {
-        font-size: 1.2em;
-        color: #a8a8b3;
-      }
-
-      nav {
-        margin-bottom: 40px;
-      }
-
+      nav { margin-bottom: 40px; }
       nav a {
         color: #e94560;
         text-decoration: none;
         margin: 0 20px;
         font-size: 1.2em;
       }
+      nav a:hover { text-decoration: underline; }
 
-      nav a:hover {
-        text-decoration: underline;
+      .info-box {
+        background-color: #16213e;
+        border: 1px solid #e94560;
+        border-radius: 10px;
+        padding: 30px;
+        max-width: 500px;
+        margin: 30px auto;
+        text-align: left;
+      }
+
+      .info-box h2 {
+        color: #e94560;
+        margin-top: 0;
+      }
+
+      .tag {
+        display: inline-block;
+        background-color: #e94560;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        margin: 5px;
+        font-size: 0.9em;
       }
     </style>
   </head>
@@ -45,6 +57,27 @@
     </nav>
 
     <h1>Über mich</h1>
-    <p>Ich lerne gerade Webentwicklung. Es macht Spaß!</p>
+
+    <div class="info-box">
+      <h2> Who am i?</h2>
+      <p>Hi, i am Richtiger. I am currently learning Coding, and Website development in general.</p>
+    </div>
+
+    <div class="info-box">
+      <h2>What can i do?</h2>
+      <div>
+        <span class="tag">Python</span>
+        <span class="tag">HTML</span>
+        <span class="tag">CSS</span>
+        <span class="tag">Q-Learning</span>
+        <span class="tag">Video Editing</span>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h2>🎯 What i am learning rightnow</p>
+      <p>Webedevelopment, HTML, CDD and Javascript</p>
+    </div>
+
   </body>
 </html>
