@@ -2,7 +2,7 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8">
-    <title>Meine Website</title>
+    <title>Meine Projekte</title>
     <style>
       body {
         background-color: #1a1a2e;
@@ -12,30 +12,34 @@
         padding: 50px;
       }
 
-      h1 {
-        color: #e94560;
-        font-size: 3em;
-      }
+      h1 { color: #e94560; font-size: 3em; }
+      p { font-size: 1.2em; color: #a8a8b3; }
 
-      p {
-        font-size: 1.2em;
-        color: #a8a8b3;
-      }
-
-      nav {
-        margin-bottom: 40px;
-      }
-
+      nav { margin-bottom: 40px; }
       nav a {
         color: #e94560;
         text-decoration: none;
         margin: 0 20px;
         font-size: 1.2em;
       }
+      nav a:hover { text-decoration: underline; }
 
-      nav a:hover {
-        text-decoration: underline;
+      .project-card {
+        background-color: #16213e;
+        border: 1px solid #e94560;
+        border-radius: 10px;
+        padding: 30px;
+        width: 300px;
+        margin: 20px auto;
+        cursor: pointer;
       }
+
+      .project-card:hover {
+        background-color: #0f3460;
+      }
+
+      .project-card h2 { color: #e94560; }
+      .project-card p { color: #a8a8b3; font-size: 1em; }
     </style>
   </head>
   <body>
@@ -44,7 +48,13 @@
       <a href="about.html">Über mich</a>
     </nav>
 
-    <h1>Hallo Welt!</h1>
-    <p>Das ist meine erste Website.</p>
+    <h1>Meine Projekte</h1>
+    <p>Hier sind meine bisherigen Projekte:</p>
+
+    <div class="project-card" onclick="window.open('projects/qlearning.html', '_blank')">
+      <h2>Q-Learning</h2>
+      <p>Ein interaktives Q-Learning Programm – schau rein und probier es aus!</p>
+    </div>
+
   </body>
 </html>
