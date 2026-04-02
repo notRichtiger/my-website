@@ -15,7 +15,6 @@
         margin: 0;
       }
 
-      /* Grain Overlay */
       body::after {
         content: '';
         position: fixed;
@@ -38,6 +37,19 @@
         font-size: 1.2em;
       }
       nav a:hover { text-decoration: underline; }
+
+      .header-shape {
+        width: 300px;
+        height: 80px;
+        border: 1px solid rgba(233, 69, 96, 0.3);
+        border-radius: 20px;
+        margin: 0 auto 40px auto;
+        transition: transform 0.3s ease;
+      }
+
+      .header-shape:hover {
+        transform: scale(1.4);
+      }
 
       .project-card {
         background-color: rgba(22, 33, 62, 0.8);
@@ -66,6 +78,8 @@
       <a href="index.html">Home</a>
       <a href="about.html">Über mich</a>
     </nav>
+
+    <div class="header-shape"></div>
 
     <h1>Meine Projekte</h1>
     <p>Hier sind meine bisherigen Projekte:</p>
