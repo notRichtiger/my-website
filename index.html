@@ -4,20 +4,13 @@
     <meta charset="UTF-8">
     <title>Meine Projekte</title>
     <style>
-      <script>
-  document.addEventListener('mousemove', function(e) {
-    const x = (e.clientX / window.innerWidth) * 100;
-    const y = (e.clientY / window.innerHeight) * 100;
-    
-    document.body.style.background = `radial-gradient(circle at ${x}% ${y}%, #0f3460, #1a1a2e)`;
-  });
-</script>
       body {
         background-color: #1a1a2e;
         color: white;
         font-family: Arial, sans-serif;
         text-align: center;
         padding: 50px;
+        transition: background 0.1s ease;
       }
 
       h1 { color: #e94560; font-size: 3em; }
@@ -33,23 +26,21 @@
       nav a:hover { text-decoration: underline; }
 
       .project-card {
-  background-color: #16213e;
-  border: 1px solid #e94560;
-  border-radius: 10px;
-  padding: 30px;
-  width: 300px;
-  margin: 20px auto;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+        background-color: #16213e;
+        border: 1px solid #e94560;
+        border-radius: 10px;
+        padding: 30px;
+        width: 300px;
+        margin: 20px auto;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
 
-.project-card:hover {
-  background-color: #0f3460;
-  transform: translateY(-10px);
-  box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
-}
-      
-
+      .project-card:hover {
+        background-color: #0f3460;
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+      }
 
       .project-card h2 { color: #e94560; }
       .project-card p { color: #a8a8b3; font-size: 1em; }
@@ -69,5 +60,12 @@
       <p>Ein interaktives Q-Learning Programm – schau rein und probier es aus!</p>
     </div>
 
+    <script>
+      document.addEventListener('mousemove', function(e) {
+        const x = (e.clientX / window.innerWidth) * 100;
+        const y = (e.clientY / window.innerHeight) * 100;
+        document.body.style.background = `radial-gradient(circle at ${x}% ${y}%, #0f3460, #1a1a2e)`;
+      });
+    </script>
   </body>
 </html>
