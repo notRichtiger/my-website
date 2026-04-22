@@ -1,183 +1,262 @@
 <!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗿</text></svg>">
-    <title>My Projekts</title>
-    <style>
-      * { box-sizing: border-box; }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗿</text></svg>">
+  <title>My Projects</title>
+  <style>
+    /* ─── Variables ─────────────────────────────────────────── */
+    :root {
+      --bg:           #0d0d0d;
+      --card-bg:      rgba(255, 255, 255, 0.04);
+      --card-border:  rgba(255, 255, 255, 0.10);
+      --card-hover:   rgba(255, 255, 255, 0.08);
+      --text:         #ffffff;
+      --text-muted:   rgba(255, 255, 255, 0.40);
+      --accent:       rgba(120, 80, 255, 0.85);
+      --accent-glow:  rgba(120, 80, 255, 0.18);
+      --radius:       12px;
+      --transition:   0.25s ease;
+    }
 
-      body {
-        background-color: #0d0d0d;
-        color: white;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 20px 50px 50px 50px;
-        transition: background 0.8s ease;
-        min-height: 100vh;
-        margin: 0;
-        opacity: 0;
-        animation: fadeIn 1s ease forwards;
-      }
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      @keyframes fadeIn {
-        to { opacity: 1; }
-      }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 28px 40px 60px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+    }
 
-      body::after {
-        content: '';
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        pointer-events: none;
-        opacity: 0.15;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-        background-size: 200px 200px;
-      }
+    @keyframes fadeIn { to { opacity: 1; } }
 
-      h1 {
-        color: white;
-        font-size: 3em;
-        min-height: 1.2em;
-      }
+    /* ─── Noise Overlay ─────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.12;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
 
-      p { font-size: 1.2em; color: #a8a8b3; }
+    /* ─── Nav ───────────────────────────────────────────────── */
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
 
-      nav { margin-bottom: 8px; }
-      nav a {
-        color: white;
-        text-decoration: none;
-        margin: 0 20px;
-        font-size: 1.2em;
-      }
-      nav a:hover { text-decoration: underline; }
+    nav a {
+      display: inline-block;
+      padding: 10px 26px;
+      border-radius: 999px;
+      font-size: 0.85em;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      text-decoration: none;
+      background: #1e1e1e;
+      color: var(--text);
+      transition: background var(--transition), transform var(--transition);
+    }
 
-      .header-shape {
-        width: 250px;
-        height: 20px;
-        background-color: rgba(255, 255, 255, 0.15);
-        border: none;
-        border-radius: 20px;
-        margin: 0 auto 10px auto;
-        transition: transform 0.3s ease;
-      }
+    nav a:hover {
+      background: #2a2a2a;
+      transform: scale(1.04);
+    }
 
-      .header-shape:hover {
-        transform: scale(1.4);
-      }
+    nav a.active {
+      background: #7a3fc0;
+      color: #ffffff;
+    }
 
-      /* Grid Layout */
-      .projects-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        max-width: 1000px;
-        margin: 0 auto;
-      }
+    nav a.active:hover {
+      background: #8f4fd6;
+    }
 
-      .project-card {
-        background-color: rgba(22, 33, 62, 0.8);
-        border: 1px solid white;
-        border-radius: 10px;
-        padding: 30px;
-        cursor: pointer;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        backdrop-filter: blur(5px);
-      }
+    /* ─── Header ────────────────────────────────────────────── */
+    h1 {
+      font-size: clamp(2em, 5vw, 3em);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      min-height: 1.3em;
+      margin-bottom: 8px;
+    }
 
-      .project-card:hover {
-        background-color: rgba(15, 52, 96, 0.8);
-        transform: translateY(-10px);
-        box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
-      }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1em;
+      margin-bottom: 40px;
+    }
 
-      .project-card h2 { color: white; }
-      .project-card p { color: #a8a8b3; font-size: 1em; }
+    /* ─── Project Grid ──────────────────────────────────────── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
 
-      /* Footer */
-      footer {
-        margin-top: 60px;
-        color: #a8a8b3;
-        font-size: 0.9em;
-      }
+    /* ─── Project Card ──────────────────────────────────────── */
+    .project-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: left;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    }
 
-      footer a {
-        color: white;
-        text-decoration: none;
-      }
+    .project-card:hover {
+      background: var(--card-hover);
+      border-color: rgba(255, 255, 255, 0.22);
+      transform: translateY(-4px);
+    }
 
-      footer a:hover { text-decoration: underline; }
-    </style>
-  </head>
-  <body>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="about.html">About me</a>
-    </nav>
+    .project-card.disabled {
+      opacity: 0.35;
+      cursor: default;
+      pointer-events: none;
+    }
 
-    <div class="header-shape"></div>
+    .card-tag {
+      font-size: 0.7em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
 
-    <h1 id="title"></h1>
-    <p>Here are my Projekts:</p>
+    .card-tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
 
-    <div class="projects-grid">
-      <div class="project-card" onclick="window.open('projects/qlearning.html', '_blank')">
-        <h2>Q-Learning</h2>
-        <p>An Interaktive Q Learning Programm</p>
-      </div>
+    .card-tag.muted { color: var(--text-muted); }
+    .card-tag.muted::before { background: var(--text-muted); }
+
+    .project-card h2 {
+      font-size: 1.05em;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .project-card p {
+      color: var(--text-muted);
+      font-size: 0.88em;
+      line-height: 1.5;
+    }
+
+    /* ─── Footer ────────────────────────────────────────────── */
+    footer {
+      margin-top: 60px;
+      color: var(--text-muted);
+      font-size: 0.85em;
+    }
+
+    footer a {
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="projects.html" class="active">Projects</a>
+    <a href="about.html">About me</a>
+  </nav>
+
+  <h1 id="title"></h1>
+  <p class="subtitle">Hier sind meine Projekte:</p>
+
+  <div class="projects-grid">
+
+    <div class="project-card" data-href="projects/qlearning.html">
+      <div class="card-tag">Machine Learning</div>
+      <h2>Q-Learning</h2>
+      <p>Ein interaktives Q-Learning Programm</p>
     </div>
 
-    <footer>
-      <p>Made with love by <a href="https://github.com/notRichtiger" target="_blank">notRichtiger</a> · GitHub</p>
-    </footer>
+    <div class="project-card disabled">
+      <div class="card-tag muted">Coming soon</div>
+      <h2>Nächstes Projekt</h2>
+      <p>Mehr kommt bald...</p>
+    </div>
 
-    <script>
-      // Typing Effekt
-      const text = "Meine Projekte";
-      let i = 0;
-      function type() {
-        if (i < text.length) {
-          document.getElementById('title').textContent += text[i];
-          i++;
-          setTimeout(type, 80);
-        }
+    <div class="project-card disabled">
+      <div class="card-tag muted">Coming soon</div>
+      <h2>Nächstes Projekt</h2>
+      <p>Mehr kommt bald...</p>
+    </div>
+
+  </div>
+
+  <footer>
+    Made with love by <a href="https://github.com/notRichtiger" target="_blank">notRichtiger</a> · GitHub
+  </footer>
+
+  <script>
+    // ─── Typing Effect ───────────────────────────────────────
+    const titleText = "Meine Projekte";
+    const titleEl = document.getElementById('title');
+    let charIndex = 0;
+
+    function typeNextChar() {
+      if (charIndex < titleText.length) {
+        titleEl.textContent += titleText[charIndex];
+        charIndex++;
+        setTimeout(typeNextChar, 80);
       }
-      setTimeout(type, 500);
+    }
 
-      // Mouse Tracker
-      const zones = [
-        { x: 0,   y: 0,   color: '120, 40, 200' },
-        { x: 100, y: 0,   color: '40, 180, 120' },
-        { x: 50,  y: 100, color: '20, 80, 200' },
-      ];
+    setTimeout(typeNextChar, 400);
 
-      function getZoneColor(mx, my) {
-        let closestZone = zones[0];
-        let closestDist = Infinity;
+    // ─── Mouse Glow ──────────────────────────────────────────
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth)  * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
 
-        zones.forEach(zone => {
-          const dist = Math.sqrt(
-            Math.pow(mx - zone.x, 2) + Math.pow(my - zone.y, 2)
-          );
-          if (dist < closestDist) {
-            closestDist = dist;
-            closestZone = zone;
-          }
-        });
+      // Shift hue slightly based on position for subtle variety
+      const hue = Math.round(260 + (x - 50) * 0.4);
 
-        return closestZone.color;
-      }
+      document.body.style.background = `
+        radial-gradient(circle at ${x}% ${y}%,
+          hsla(${hue}, 70%, 55%, 0.15) 0%,
+          var(--bg) 55%)
+      `;
+    });
 
-      document.addEventListener('mousemove', function(e) {
-        const x = (e.clientX / window.innerWidth) * 100;
-        const y = (e.clientY / window.innerHeight) * 100;
-        const color = getZoneColor(x, y);
-        document.body.style.background = `
-          radial-gradient(circle at ${x}% ${y}%, 
-            rgba(${color}, 0.4) 0%, 
-            #0d0d0d 30%)
-        `;
+    // ─── Card Click Handler ───────────────────────────────────
+    document.querySelectorAll('.project-card[data-href]').forEach(card => {
+      card.addEventListener('click', () => {
+        window.open(card.dataset.href, '_blank');
       });
-    </script>
-  </body>
+    });
+  </script>
+
+</body>
 </html>
