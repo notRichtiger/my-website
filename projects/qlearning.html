@@ -222,6 +222,13 @@
     }
 
     /* ─── Right Column: Screenshot ──────────────────────────── */
+    .screenshot-wrapper {
+      perspective: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .screenshot-col {
       position: relative;
       border-radius: var(--radius);
@@ -229,6 +236,20 @@
       border: 1px solid var(--card-border);
       background: #111;
       aspect-ratio: 16 / 9;
+      width: 100%;
+      transform: rotateY(-14deg) rotateX(4deg) scale(0.97);
+      box-shadow:
+        8px 16px 40px rgba(0, 0, 0, 0.6),
+        1px 2px 0px rgba(255,255,255,0.05) inset;
+      transition: transform 0.5s cubic-bezier(0.2, 0, 0.2, 1),
+                  box-shadow 0.5s cubic-bezier(0.2, 0, 0.2, 1);
+    }
+
+    .screenshot-col:hover {
+      transform: rotateY(-4deg) rotateX(1deg) scale(1);
+      box-shadow:
+        20px 30px 60px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(122, 63, 192, 0.15);
     }
 
     .screenshot-col img {
@@ -236,7 +257,7 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      opacity: 0.9;
+      opacity: 0.92;
       transition: opacity var(--transition);
     }
 
@@ -317,12 +338,14 @@
     </div>
 
     <!-- ─── Right: Screenshot ──────────────────────────────── -->
-    <div class="screenshot-col">
-      <!--
-        Ersetze den src-Wert mit dem Pfad zu deinem Screenshot.
-        z.B.: src="../assets/qlearning-screenshot.png"
-      -->
-      <img src="../assets/screenshot.png" alt="Q-Learning Screenshot">
+    <div class="screenshot-wrapper">
+      <div class="screenshot-col">
+        <!--
+          Ersetze den src-Wert mit dem Pfad zu deinem Screenshot.
+          z.B.: src="../assets/screenshot.png"
+        -->
+        <img src="../assets/screenshot.png" alt="Q-Learning Screenshot">
+      </div>
     </div>
 
   </div>
@@ -352,4 +375,3 @@
 
 </body>
 </html>
-
