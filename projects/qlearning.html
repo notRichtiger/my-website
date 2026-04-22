@@ -1,182 +1,43 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗿</text></svg>">
-  <title>About me</title>
-  <style>
-    /* ─── Variables ─────────────────────────────────────────── */
-    :root {
-      --bg:          #0d0d0d;
-      --text:        #ffffff;
-      --text-muted:  rgba(255, 255, 255, 0.40);
-      --radius:      12px;
-      --transition:  0.25s ease;
-    }
+  <head>
+    <meta charset="UTF-8">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗿</text></svg>">
+    <title>Q-Learning Project</title>
+    <style>
+      body {
+        background-color: #ffffff;
+        color: white;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 50px;
+      }
 
-    /* ─── Reset & Base ──────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      h1 { color: #ffffff; font-size: 3em; }
+      p { font-size: 1.2em; color: #5a5a62; }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      min-height: 100vh;
-      padding: 28px 40px 60px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      opacity: 0;
-      animation: fadeIn 0.8s ease forwards;
-    }
+      .btn {
+        display: inline-block;
+        margin-top: 30px;
+        padding: 15px 40px;
+        background-color: #ffffff;
+        color: rgb(68, 68, 68);
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 1.2em;
+      }
 
-    @keyframes fadeIn { to { opacity: 1; } }
+      .btn:hover { background-color: #ffffff; }
+    </style>
+  </head>
+  <body>
+    <h1>Q-Learning Programm</h1>
+    <p>This Programm was made to help explain q learning.</p>
+    <p>Technologies: Python</p>
 
-    /* ─── Noise Overlay ─────────────────────────────────────── */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.12;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 200px;
-    }
-
-    /* ─── Nav ───────────────────────────────────────────────── */
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 40px;
-      flex-wrap: wrap;
-    }
-
-    nav a {
-      display: inline-block;
-      padding: 10px 26px;
-      border-radius: 999px;
-      font-size: 0.85em;
-      font-weight: 700;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      text-decoration: none;
-      background: #1e1e1e;
-      color: var(--text);
-      transition: background var(--transition), transform var(--transition);
-    }
-
-    nav a:hover     { background: #2a2a2a; transform: scale(1.04); }
-    nav a.active    { background: #7a3fc0; color: #ffffff; }
-    nav a.active:hover { background: #8f4fd6; }
-
-    /* ─── Header ────────────────────────────────────────────── */
-    h1 {
-      font-size: clamp(2em, 5vw, 3em);
-      font-weight: 500;
-      letter-spacing: -0.02em;
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 1em;
-      margin-bottom: 60px;
-    }
-
-    /* ─── GitHub Button ─────────────────────────────────────── */
-    .github-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 14px;
-      padding: 22px 52px;
-      border-radius: 999px;
-      background: #1e1e1e;
-      color: var(--text);
-      font-size: 1.3em;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-decoration: none;
-      border: 1px solid rgba(255, 255, 255, 0.10);
-      transition: background var(--transition), border-color var(--transition),
-                  transform var(--transition), box-shadow var(--transition);
-      margin: auto 0; /* vertically center in flex body */
-    }
-
-    .github-btn:hover {
-      background: #7a3fc0;
-      border-color: #9b5fe0;
-      transform: scale(1.06);
-      box-shadow: 0 0 40px rgba(122, 63, 192, 0.35);
-    }
-
-    .github-btn:active {
-      transform: scale(1.02);
-    }
-
-    /* GitHub icon */
-    .github-btn svg {
-      width: 28px;
-      height: 28px;
-      fill: currentColor;
-      flex-shrink: 0;
-    }
-
-    /* ─── Footer ────────────────────────────────────────────── */
-    footer {
-      margin-top: auto;
-      padding-top: 60px;
-      color: var(--text-muted);
-      font-size: 0.85em;
-    }
-
-    footer a {
-      color: rgba(255, 255, 255, 0.6);
-      text-decoration: none;
-      transition: color var(--transition);
-    }
-
-    footer a:hover { color: var(--text); }
-  </style>
-</head>
-<body>
-
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="projects.html">Projects</a>
-    <a href="about.html" class="active">About me</a>
-  </nav>
-
-  <h1>About me</h1>
-  <p class="subtitle">notRichtiger · Developer & Learner</p>
-
-  <a class="github-btn" href="https://github.com/notRichtiger" target="_blank">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-    </svg>
-    GitHub ansehen
-  </a>
-
-  <footer>
-    Made with love by <a href="https://github.com/notRichtiger" target="_blank">notRichtiger</a> · GitHub
-  </footer>
-
-  <script>
-    // ─── Mouse Glow ──────────────────────────────────────────
-    document.addEventListener('mousemove', (e) => {
-      const x = (e.clientX / window.innerWidth)  * 100;
-      const y = (e.clientY / window.innerHeight) * 100;
-      const hue = Math.round(260 + (x - 50) * 0.4);
-
-      document.body.style.background = `
-        radial-gradient(circle at ${x}% ${y}%,
-          hsla(${hue}, 70%, 55%, 0.15) 0%,
-          var(--bg) 55%)
-      `;
-    });
-  </script>
-
-</body>
+    <a class="btn" href="https://github.com/notRichtiger/QlearningInteraktive/releases/tag/QLearning" target="_blank">
+      Auf GitHub ansehen / Download
+    </a>
+  </body>
 </html>
