@@ -1,43 +1,355 @@
 <!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8">
-    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗿</text></svg>">
-    <title>Q-Learning Project</title>
-    <style>
-      body {
-        background-color: #ffffff;
-        color: white;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 50px;
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗿</text></svg>">
+  <title>Q-Learning Project</title>
+  <style>
+    /* ─── Variables ─────────────────────────────────────────── */
+    :root {
+      --bg:          #0d0d0d;
+      --card-bg:     rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.10);
+      --card-hover:  rgba(255, 255, 255, 0.08);
+      --text:        #ffffff;
+      --text-muted:  rgba(255, 255, 255, 0.40);
+      --accent:      #7a3fc0;
+      --accent-hover:#8f4fd6;
+      --radius:      12px;
+      --transition:  0.25s ease;
+    }
 
-      h1 { color: #ffffff; font-size: 3em; }
-      p { font-size: 1.2em; color: #5a5a62; }
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      .btn {
-        display: inline-block;
-        margin-top: 30px;
-        padding: 15px 40px;
-        background-color: #ffffff;
-        color: rgb(68, 68, 68);
-        text-decoration: none;
-        border-radius: 8px;
-        font-size: 1.2em;
-      }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 28px 40px 60px;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+    }
 
-      .btn:hover { background-color: #ffffff; }
-    </style>
-  </head>
-  <body>
-    <h1>Q-Learning Programm</h1>
-    <p>This Programm was made to help explain q learning.</p>
-    <p>Technologies: Python</p>
+    @keyframes fadeIn { to { opacity: 1; } }
 
-    <a class="btn" href="https://github.com/notRichtiger/QlearningInteraktive/releases/tag/QLearning" target="_blank">
-      Auf GitHub ansehen / Download
-    </a>
-  </body>
+    /* ─── Noise Overlay ─────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.12;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* ─── Nav ───────────────────────────────────────────────── */
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      display: inline-block;
+      padding: 10px 26px;
+      border-radius: 999px;
+      font-size: 0.85em;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      text-decoration: none;
+      background: #1e1e1e;
+      color: var(--text);
+      transition: background var(--transition), transform var(--transition);
+    }
+
+    nav a:hover      { background: #2a2a2a; transform: scale(1.04); }
+    nav a.active     { background: var(--accent); color: #fff; }
+    nav a.active:hover { background: var(--accent-hover); }
+
+    /* ─── Page Title ────────────────────────────────────────── */
+    .page-title {
+      text-align: center;
+      font-size: clamp(1.8em, 4vw, 2.6em);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.95em;
+      margin-bottom: 40px;
+    }
+
+    /* ─── Main Layout ───────────────────────────────────────── */
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    /* ─── Left Column: Info Boxes + Download ────────────────── */
+    .info-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .info-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      text-align: left;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    }
+
+    .info-box:hover {
+      background: var(--card-hover);
+      border-color: rgba(255, 255, 255, 0.20);
+      transform: translateX(4px);
+    }
+
+    .info-box-label {
+      font-size: 0.7em;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-hover);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-box-label::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-hover);
+      flex-shrink: 0;
+    }
+
+    .info-box p {
+      color: var(--text-muted);
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    /* ─── Language Bar ──────────────────────────────────────── */
+    .lang-bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .lang-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .lang-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .lang-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85em;
+    }
+
+    .lang-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .lang-name { color: var(--text); }
+    .lang-pct  { color: var(--text-muted); }
+
+    /* ─── Download Button ───────────────────────────────────── */
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 24px;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      font-size: 1em;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    }
+
+    .download-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 0 28px rgba(122, 63, 192, 0.40);
+    }
+
+    .download-btn:active { transform: translateY(0); }
+
+    .download-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ─── Right Column: Screenshot ──────────────────────────── */
+    .screenshot-col {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: #111;
+      aspect-ratio: 16 / 9;
+    }
+
+    .screenshot-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0.9;
+      transition: opacity var(--transition);
+    }
+
+    .screenshot-col:hover img { opacity: 1; }
+
+    /* ─── Footer ────────────────────────────────────────────── */
+    footer {
+      margin-top: 60px;
+      color: var(--text-muted);
+      font-size: 0.85em;
+      text-align: center;
+    }
+
+    footer a {
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    footer a:hover { color: var(--text); }
+
+    /* ─── Responsive ────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .content { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../projects.html" class="active">Projects</a>
+    <a href="../about.html">About me</a>
+  </nav>
+
+  <h1 class="page-title">Q-Learning</h1>
+  <p class="page-subtitle">Interaktives Labyrinth-Programm</p>
+
+  <div class="content">
+
+    <!-- ─── Left: Info + Download ──────────────────────────── -->
+    <div class="info-col">
+
+      <div class="info-box">
+        <div class="info-box-label">Description</div>
+        <p>A simple interactive Q-Learning program. Train an agent to navigate a maze using reinforcement learning — step by step.</p>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-label">Known Issues</div>
+        <p>
+          · Does not work on Linux<br>
+          · Windows Defender may flag it — don't worry about it
+        </p>
+      </div>
+
+      <div class="info-box" id="lang-box">
+        <div class="info-box-label">Languages</div>
+        <div class="lang-bar-track">
+          <div class="lang-bar-fill" style="background: #3572A5;" data-width="100%"></div>
+        </div>
+        <div class="lang-legend">
+          <div class="lang-item">
+            <div class="lang-dot" style="background: #3572A5;"></div>
+            <span class="lang-name">Python</span>
+            <span class="lang-pct">100.0%</span>
+          </div>
+        </div>
+      </div>
+
+      <a class="download-btn" href="https://github.com/notRichtiger/QlearningInteraktive/releases/tag/QLearning" target="_blank">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        Download / GitHub
+      </a>
+
+    </div>
+
+    <!-- ─── Right: Screenshot ──────────────────────────────── -->
+    <div class="screenshot-col">
+      <!--
+        Ersetze den src-Wert mit dem Pfad zu deinem Screenshot.
+        z.B.: src="../assets/qlearning-screenshot.png"
+      -->
+      <img src="C:\Users\Konst\Documents\GitHub\my-website\assets\screenshot.png" alt="Q-Learning Screenshot">
+    </div>
+
+  </div>
+
+  <footer>
+    Made with love by <a href="https://github.com/notRichtiger" target="_blank">notRichtiger</a> · GitHub
+  </footer>
+
+  <script>
+    // ─── Language Bar Animation ───────────────────────────────
+    // Animate bars when the box scrolls into view
+    const langBox = document.getElementById('lang-box');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll('.lang-bar-fill').forEach(bar => {
+            bar.style.width = bar.dataset.width;
+          });
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+
+    observer.observe(langBox);
+  </script>
+
+</body>
 </html>
+
