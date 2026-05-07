@@ -51,38 +51,18 @@
     nav {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      margin-bottom: 40px;
-      flex-wrap: wrap;
+      gap: 32px;
+      margin-bottom: 32px;
     }
 
     nav a {
-      display: inline-block;
-      padding: 10px 26px;
-      border-radius: 999px;
-      font-size: 0.85em;
-      font-weight: 700;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
+      color: var(--text-muted);
+      font-size: 0.95em;
       text-decoration: none;
-      background: #1e1e1e;
-      color: var(--text);
-      transition: background var(--transition), transform var(--transition);
+      transition: color var(--transition);
     }
 
-    nav a:hover {
-      background: #2a2a2a;
-      transform: scale(1.04);
-    }
-
-    nav a.active {
-      background: #7a3fc0;
-      color: #ffffff;
-    }
-
-    nav a.active:hover {
-      background: #8f4fd6;
-    }
+    nav a:hover, nav a.active { color: var(--text); }
 
     /* ─── Header ────────────────────────────────────────────── */
     h1 {
@@ -191,26 +171,26 @@
   </nav>
 
   <h1 id="title"></h1>
-  <p class="subtitle">here are my projekts:</p>
+  <p class="subtitle">Hier sind meine Projekte:</p>
 
   <div class="projects-grid">
 
     <div class="project-card" data-href="projects/qlearning.html">
       <div class="card-tag">Machine Learning</div>
       <h2>Q-Learning</h2>
-      <p>a interactive Q-Learning Programm</p>
+      <p>Ein interaktives Q-Learning Programm</p>
+    </div>
+
+    <div class="project-card" data-href="projects/pong.html">
+      <div class="card-tag">Game</div>
+      <h2>Pong Arcade</h2>
+      <p>Ein klassisches Pong Game mit Pygame</p>
     </div>
 
     <div class="project-card disabled">
       <div class="card-tag muted">Coming soon</div>
-      <h2>next project</h2>
-      <p>more coming soon...</p>
-    </div>
-
-    <div class="project-card disabled">
-      <div class="card-tag muted">Coming soon</div>
-      <h2>next project</h2>
-      <p>more coming soon...</p>
+      <h2>Nächstes Projekt</h2>
+      <p>Mehr kommt bald...</p>
     </div>
 
   </div>
