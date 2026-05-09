@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d0f;
+      --surface:   #16161a;
+      --surface2:  #1e1e24;
+      --border:    rgba(255,255,255,0.07);
+      --text:      #e8e8f0;
+      --muted:     #6b6b80;
+      --accent:    #a78bfa;
+      --accent2:   #7c3aed;
+      --op-bg:     #1e1a2e;
+      --op-text:   #a78bfa;
+      --eq-bg:     #a78bfa;
+      --eq-text:   #0d0d0f;
+      --danger:    #f87171;
+      --radius:    14px;
+      --radius-sm: 10px;
+    }
+
+    [data-theme="light"] {
+      --bg:       #f0f0f5;
+      --surface:  #ffffff;
+      --surface2: #f5f5fa;
+      --border:   rgba(0,0,0,0.08);
+      --text:     #111118;
+      --muted:    #8888a0;
+      --accent:   #7c3aed;
+      --accent2:  #6d28d9;
+      --op-bg:    #ede9fe;
+      --op-text:  #6d28d9;
+      --eq-bg:    #7c3aed;
+      --eq-text:  #ffffff;
+      --danger:   #dc2626;
+    }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* subtle grid bg */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      width: min(360px, 94vw);
+    }
+
+    /* top bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .theme-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+    }
+    .theme-btn:hover { background: var(--surface2); color: var(--text); transform: scale(1.08); }
+
+    /* calculator card */
+    .calc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    }
+
+    /* display */
+    .display {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 18px 14px;
+      margin-bottom: 16px;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-end;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .display-history {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 18px;
+      transition: opacity 0.2s;
+      word-break: break-all;
+      text-align: right;
+    }
+
+    .display-main {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 36px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      word-break: break-all;
+      text-align: right;
+      line-height: 1.1;
+      transition: transform 0.1s, color 0.2s;
+    }
+
+    .display-main.pop {
+      transform: scale(0.97);
+      color: var(--accent);
+    }
+
+    /* button grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 400;
+      height: 64px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--surface2);
+      color: var(--text);
+      transition: background 0.15s, transform 0.1s, border-color 0.15s, box-shadow 0.15s;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.15s;
+      border-radius: inherit;
+    }
+
+    .btn:hover { background: #2a2a35; border-color: rgba(255,255,255,0.14); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    [data-theme="light"] .btn:hover { background: #e8e8f0; }
+    .btn:active { transform: translateY(0) scale(0.96); box-shadow: none; }
+    .btn:active::after { opacity: 0.06; }
+
+    /* operator buttons */
+    .btn.op {
+      background: var(--op-bg);
+      color: var(--op-text);
+      border-color: rgba(167,139,250,0.2);
+      font-size: 20px;
+    }
+    .btn.op:hover { background: #2a2040; border-color: rgba(167,139,250,0.35); }
+    [data-theme="light"] .btn.op:hover { background: #ddd6fe; }
+
+    /* equals */
+    .btn.eq {
+      background: var(--eq-bg);
+      color: var(--eq-text);
+      border-color: transparent;
+      font-size: 22px;
+      font-weight: 500;
+    }
+    .btn.eq:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+    .btn.eq:active { transform: scale(0.96); box-shadow: none; }
+
+    /* clear */
+    .btn.clear {
+      background: rgba(248,113,113,0.1);
+      color: var(--danger);
+      border-color: rgba(248,113,113,0.15);
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+    }
+    .btn.clear:hover { background: rgba(248,113,113,0.18); border-color: rgba(248,113,113,0.3); }
+
+    /* backspace */
+    .btn.back {
+      color: var(--muted);
+      font-size: 20px;
+    }
+    .btn.back:hover { color: var(--danger); }
+
+    /* span 2 cols */
+    .span2 { grid-column: span 2; }
+
+    /* error shake */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-6px); }
+      40%       { transform: translateX(6px); }
+      60%       { transform: translateX(-4px); }
+      80%       { transform: translateX(4px); }
+    }
+    .shake { animation: shake 0.35s ease; }
+
+    /* resize hint */
+    .hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 12px;
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="topbar">
+    <span class="brand">Calc</span>
+    <button class="theme-btn" id="themeBtn" title="Dark/Light Mode umschalten">🌙</button>
+  </div>
+
+  <div class="calc">
+    <div class="display" id="display">
+      <div class="display-history" id="history"></div>
+      <div class="display-main" id="main">0</div>
+    </div>
+
+    <div class="grid">
+      <!-- Row 1 -->
+      <button class="btn clear span2" onclick="clearAll()">C  Löschen</button>
+      <button class="btn back" onclick="backspace()">⌫</button>
+      <button class="btn op" onclick="append('/')">÷</button>
+
+      <!-- Row 2 -->
+      <button class="btn" onclick="append('7')">7</button>
+      <button class="btn" onclick="append('8')">8</button>
+      <button class="btn" onclick="append('9')">9</button>
+      <button class="btn op" onclick="append('*')">×</button>
+
+      <!-- Row 3 -->
+      <button class="btn" onclick="append('4')">4</button>
+      <button class="btn" onclick="append('5')">5</button>
+      <button class="btn" onclick="append('6')">6</button>
+      <button class="btn op" onclick="append('-')">−</button>
+
+      <!-- Row 4 -->
+      <button class="btn" onclick="append('1')">1</button>
+      <button class="btn" onclick="append('2')">2</button>
+      <button class="btn" onclick="append('3')">3</button>
+      <button class="btn op" onclick="append('+')">+</button>
+
+      <!-- Row 5 -->
+      <button class="btn span2" onclick="append('0')">0</button>
+      <button class="btn" onclick="append('.')">.</button>
+      <button class="btn eq" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <p class="hint">öffne im Browser · ↕ Fenster frei skalierbar</p>
+</div>
+
+<script>
+  let current = '';
+  let lastResult = null;
+
+  const mainEl    = document.getElementById('main');
+  const historyEl = document.getElementById('history');
+
+  function updateDisplay(val) {
+    mainEl.textContent = val || '0';
+  }
+
+  function append(char) {
+    // Prevent double operators
+    const ops = ['+','-','*','/'];
+    if (ops.includes(char) && ops.includes(current.slice(-1))) {
+      current = current.slice(0, -1);
+    }
+    // Prevent leading zeros
+    if (current === '0' && char !== '.' && !ops.includes(char)) {
+      current = char;
+    } else {
+      current += char;
+    }
+    updateDisplay(formatDisplay(current));
+  }
+
+  function formatDisplay(str) {
+    // Show × and ÷ instead of * and /
+    return str.replace(/\*/g,'×').replace(/\//g,'÷');
+  }
+
+  function clearAll() {
+    current = '';
+    historyEl.textContent = '';
+    updateDisplay('0');
+  }
+
+  function backspace() {
+    current = current.slice(0, -1);
+    updateDisplay(current ? formatDisplay(current) : '0');
+  }
+
+  function calculate() {
+    if (!current) return;
+    try {
+      const expr = current;
+      const result = Function('"use strict"; return (' + expr + ')')();
+      if (!isFinite(result)) throw new Error('nicht endlich');
+      // Round floating point weirdness
+      const rounded = parseFloat(result.toPrecision(12));
+      historyEl.textContent = formatDisplay(expr) + ' =';
+      current = String(rounded);
+      updateDisplay(rounded);
+      // pop animation
+      mainEl.classList.add('pop');
+      setTimeout(() => mainEl.classList.remove('pop'), 150);
+    } catch(e) {
+      mainEl.classList.add('shake');
+      setTimeout(() => mainEl.classList.remove('shake'), 350);
+      historyEl.textContent = 'Fehler';
+      current = '';
+      setTimeout(() => { updateDisplay('0'); historyEl.textContent=''; }, 1200);
+    }
+  }
+
+  // Keyboard support
+  document.addEventListener('keydown', e => {
+    if (e.key >= '0' && e.key <= '9') append(e.key);
+    else if (['+','-','*','/'].includes(e.key)) append(e.key);
+    else if (e.key === '.') append('.');
+    else if (e.key === 'Enter' || e.key === '=') calculate();
+    else if (e.key === 'Backspace') backspace();
+    else if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') clearAll();
+  });
+
+  // Dark / Light toggle
+  const themeBtn = document.getElementById('themeBtn');
+  themeBtn.addEventListener('click', () => {
+    const html = document.documentElement;
+    const isDark = html.dataset.theme === 'dark';
+    html.dataset.theme = isDark ? 'light' : 'dark';
+    themeBtn.textContent = isDark ? '☀️' : '🌙';
+  });
+</script>
+</body>
+</html>
