@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bubble Sort — Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #0d0b14;
+  --surface:     #13101f;
+  --border:      #2a2040;
+  --border-soft: #1a1630;
+
+  --text-primary:   #ede8ff;
+  --text-secondary: #7a6fa0;
+  --text-muted:     #3d3560;
+
+  --accent:      #a855f7;
+  --accent-dim:  #8b3fd4;
+  --accent-glow: rgba(168,85,247,0.15);
+
+  --col-unsorted:  #1e1a30;
+  --col-comparing: #60a5fa;
+  --col-swapping:  #f472b6;
+  --col-sorted:    #a855f7;
+
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Syne', sans-serif;
+  --radius: 4px;
+  --transition: 200ms ease;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-grid {
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+.container {
+  position: relative; z-index: 1;
+  max-width: 900px; margin: 0 auto;
+  padding: 60px 32px 48px;
+}
+.header { margin-bottom: 52px; }
+.header-label {
+  font-size: 11px; letter-spacing: 0.2em;
+  color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px;
+}
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 8vw, 88px);
+  font-weight: 800; line-height: 0.95;
+  letter-spacing: -0.03em; color: var(--text-primary); margin-bottom: 24px;
+}
+.title-accent {
+  color: var(--accent); display: block;
+  text-shadow: 0 0 40px rgba(168,85,247,0.4);
+}
+.subtitle {
+  font-size: 14px; color: var(--text-secondary);
+  line-height: 1.7; max-width: 400px; margin-bottom: 20px;
+}
+.complexity-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 8px 16px; border-radius: var(--radius);
+  font-size: 12px; color: var(--text-secondary);
+}
+.complexity-badge strong { color: var(--accent); }
+.complexity-badge .divider { color: var(--text-muted); }
+
+.visualizer-section {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 32px;
+  display: flex; flex-direction: column; gap: 24px;
+  box-shadow: 0 0 40px rgba(168,85,247,0.05);
+}
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
+.control-group { display: flex; flex-direction: column; gap: 6px; min-width: 130px; }
+.control-group label {
+  font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-secondary);
+}
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 2px; background: var(--border);
+  border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--bg); cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 10px rgba(168,85,247,0.6);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--bg); cursor: pointer;
+}
+.btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border: 1px solid var(--border);
+  border-radius: var(--radius); font-family: var(--font-mono);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+  cursor: pointer; transition: all var(--transition);
+  background: transparent; color: var(--text-primary);
+}
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-primary {
+  background: var(--accent); border-color: var(--accent);
+  color: #0d0b14; box-shadow: 0 0 20px rgba(168,85,247,0.3);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-dim); border-color: var(--accent-dim);
+  transform: translateY(-1px); box-shadow: 0 0 28px rgba(168,85,247,0.5);
+}
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent); background: var(--accent-glow); color: var(--accent);
+}
+.btn-icon { font-size: 14px; }
+
+.canvas-wrapper {
+  width: 100%; background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius); overflow: hidden;
+}
+#sortCanvas { display: block; width: 100%; height: 280px; }
+
+.stats-bar {
+  display: flex; border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.stat {
+  flex: 1; padding: 14px 20px;
+  border-right: 1px solid var(--border);
+}
+.stat:last-child { border-right: none; }
+.stat-label {
+  font-size: 10px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+}
+.stat-value {
+  font-family: var(--font-display); font-size: 22px;
+  font-weight: 700; color: var(--text-primary);
+  transition: color var(--transition), text-shadow var(--transition);
+}
+.stat-value.flash {
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(168,85,247,0.5);
+}
+.legend { display: flex; gap: 20px; flex-wrap: wrap; }
+.legend-item {
+  display: flex; align-items: center;
+  gap: 7px; font-size: 11px; color: var(--text-secondary);
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.legend-dot.unsorted  { background: var(--col-unsorted); border: 1px solid #3a2a5e; }
+.legend-dot.comparing { background: var(--col-comparing); }
+.legend-dot.swapping  { background: var(--col-swapping); }
+.legend-dot.sorted    { background: var(--col-sorted); box-shadow: 0 0 6px rgba(168,85,247,0.7); }
+
+.footer { margin-top: 40px; text-align: center; font-size: 12px; color: var(--text-muted); }
+.footer a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color var(--transition); }
+.footer a:hover { border-color: var(--accent); }
+
+@media (max-width: 600px) {
+  .container { padding: 40px 20px 32px; }
+  .controls { flex-direction: column; align-items: stretch; }
+  .btn-group { margin-left: 0; }
+  #sortCanvas { height: 200px; }
+  .stats-bar { flex-direction: column; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat:last-child { border-bottom: none; }
+}
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <main class="container">
+    <header class="header">
+      <div class="header-label">ALGORITHM / 01</div>
+      <h1 class="title">Bubble<br><span class="title-accent">Sort</span></h1>
+      <p class="subtitle">Vergleicht benachbarte Elemente und tauscht sie,<br>bis das Array vollständig sortiert ist.</p>
+      <div class="complexity-badge">
+        <span>Zeit: <strong>O(n²)</strong></span>
+        <span class="divider">·</span>
+        <span>Speicher: <strong>O(1)</strong></span>
+      </div>
+    </header>
+
+    <section class="visualizer-section">
+      <div class="controls">
+        <div class="control-group">
+          <label for="arraySize">Größe: <span id="sizeValue">40</span></label>
+          <input type="range" id="arraySize" min="10" max="100" value="40" />
+        </div>
+        <div class="control-group">
+          <label for="speed">Tempo: <span id="speedValue">50</span></label>
+          <input type="range" id="speed" min="1" max="100" value="50" />
+        </div>
+        <div class="btn-group">
+          <button id="btnShuffle" class="btn btn-secondary"><span class="btn-icon">⇄</span> Shuffle</button>
+          <button id="btnStart"   class="btn btn-primary"><span class="btn-icon">▶</span> Start</button>
+          <button id="btnReset"   class="btn btn-secondary" disabled>↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="canvas-wrapper"><canvas id="sortCanvas"></canvas></div>
+
+      <div class="stats-bar">
+        <div class="stat"><div class="stat-label">Vergleiche</div><div class="stat-value" id="statComparisons">0</div></div>
+        <div class="stat"><div class="stat-label">Swaps</div><div class="stat-value" id="statSwaps">0</div></div>
+        <div class="stat"><div class="stat-label">Status</div><div class="stat-value" id="statStatus">Bereit</div></div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot unsorted"></span> Unsortiert</div>
+        <div class="legend-item"><span class="legend-dot comparing"></span> Vergleich</div>
+        <div class="legend-item"><span class="legend-dot swapping"></span> Swap</div>
+        <div class="legend-item"><span class="legend-dot sorted"></span> Sortiert</div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Nur Bubble Sort? Alle Algorithmen auf <a href="https://github.com" target="_blank" rel="noopener">GitHub ↗</a></p>
+    </footer>
+  </main>
+
+  <script>
+const canvas=document.getElementById('sortCanvas'),ctx=canvas.getContext('2d');
+const btnStart=document.getElementById('btnStart'),btnShuffle=document.getElementById('btnShuffle'),btnReset=document.getElementById('btnReset');
+const sliderSize=document.getElementById('arraySize'),sliderSpeed=document.getElementById('speed');
+const labelSize=document.getElementById('sizeValue'),labelSpeed=document.getElementById('speedValue');
+const statComp=document.getElementById('statComparisons'),statSwapsEl=document.getElementById('statSwaps'),statStatus=document.getElementById('statStatus');
+
+let array=[],steps=[],stepIndex=0,isRunning=false,isPaused=false,animTimeout=null,sortedUpTo=Infinity;
+let comparisons=0,swaps=0;
+
+const C={bar:'#1e1a30',comparing:'#60a5fa',swapping:'#f472b6',sorted:'#a855f7'};
+
+function resizeCanvas(){
+  canvas.width=canvas.parentElement.clientWidth;
+  canvas.height=canvas.offsetHeight||280;
+  drawArray(array,[],[],sortedUpTo);
+}
+function generateArray(n){return Array.from({length:n},(_,i)=>Math.floor(10+((i+1)/n)*90+Math.random()*20-10));}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function* bubbleSortGen(arr){
+  const a=[...arr],n=a.length;
+  for(let pass=0;pass<n-1;pass++){
+    let swapped=false;
+    for(let i=0;i<n-1-pass;i++){
+      yield{type:'compare',i,j:i+1,arr:[...a],sortedFrom:n-pass};
+      if(a[i]>a[i+1]){[a[i],a[i+1]]=[a[i+1],a[i]];swapped=true;yield{type:'swap',i,j:i+1,arr:[...a],sortedFrom:n-pass};}
+    }
+    yield{type:'sorted',arr:[...a],sortedFrom:n-pass};
+    if(!swapped)break;
+  }
+  yield{type:'done',arr:[...a],sortedFrom:0};
+}
+function computeSteps(arr){const g=bubbleSortGen(arr),r=[];for(const s of g)r.push(s);return r;}
+
+function rr(x,y,w,h,r){
+  if(h<r*2)r=h/2;
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h);
+  ctx.lineTo(x,y+h);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+function drawArray(arr,comparing=[],swapping=[],sortedFrom=Infinity){
+  const W=canvas.width,H=canvas.height,n=arr.length;
+  const gap=Math.max(1,Math.floor(W/n*0.08));
+  const barW=(W-gap*(n+1))/n;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#2a2040';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,H*.96);ctx.lineTo(W,H*.96);ctx.stroke();
+  for(let i=0;i<n;i++){
+    const x=gap+i*(barW+gap),barH=(arr[i]/130)*(H*.88),y=H*.96-barH,r=Math.min(2,barW*.2);
+    let color=C.bar;
+    if(i>=sortedFrom)color=C.sorted;
+    if(swapping.includes(i))color=C.swapping;
+    if(comparing.includes(i))color=C.comparing;
+    ctx.shadowColor=color!==C.bar?color:'transparent';
+    ctx.shadowBlur=color!==C.bar?8:0;
+    ctx.fillStyle=color;rr(x,y,barW,barH,r);ctx.fill();
+  }
+  ctx.shadowBlur=0;
+}
+
+function resetStats(){comparisons=0;swaps=0;flash(statComp,0);flash(statSwapsEl,0);setStatus('Bereit');}
+function flash(el,val){el.textContent=val.toLocaleString('de-DE');el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),180);}
+function setStatus(t){statStatus.textContent=t;}
+function getDelay(){return Math.round(600-(parseInt(sliderSpeed.value)-1)*5.98);}
+
+function runStep(){
+  if(!isRunning||isPaused)return;
+  if(stepIndex>=steps.length){finishSort();return;}
+  const s=steps[stepIndex++];
+  if(s.type==='compare'){comparisons++;drawArray(s.arr,[s.i,s.j],[],s.sortedFrom);flash(statComp,comparisons);}
+  else if(s.type==='swap'){swaps++;drawArray(s.arr,[],[s.i,s.j],s.sortedFrom);flash(statSwapsEl,swaps);}
+  else if(s.type==='sorted'){sortedUpTo=s.sortedFrom;drawArray(s.arr,[],[],s.sortedFrom);}
+  else if(s.type==='done'){sortedUpTo=0;drawArray(s.arr,[],[],0);}
+  animTimeout=setTimeout(runStep,getDelay());
+}
+
+function finishSort(){
+  isRunning=false;setStatus('✓ Fertig');
+  btnStart.innerHTML='<span class="btn-icon">▶</span> Start';
+  btnStart.disabled=true;btnReset.disabled=false;
+  drawArray(steps[steps.length-1].arr,[],[],0);
+}
+
+btnStart.addEventListener('click',()=>{
+  if(!isRunning&&!isPaused){
+    steps=computeSteps(array);stepIndex=0;isRunning=true;isPaused=false;sortedUpTo=Infinity;
+    resetStats();setStatus('Läuft…');
+    btnStart.innerHTML='<span class="btn-icon">⏸</span> Pause';
+    btnShuffle.disabled=true;btnReset.disabled=false;sliderSize.disabled=true;
+    runStep();
+  }else if(isRunning&&!isPaused){
+    isPaused=true;clearTimeout(animTimeout);setStatus('Pausiert');
+    btnStart.innerHTML='<span class="btn-icon">▶</span> Weiter';
+  }else if(isPaused){
+    isPaused=false;setStatus('Läuft…');
+    btnStart.innerHTML='<span class="btn-icon">⏸</span> Pause';
+    runStep();
+  }
+});
+btnShuffle.addEventListener('click',()=>{
+  if(isRunning)return;
+  array=shuffle(generateArray(parseInt(sliderSize.value)));
+  sortedUpTo=Infinity;resetStats();drawArray(array,[],[],Infinity);
+  btnStart.disabled=false;btnStart.innerHTML='<span class="btn-icon">▶</span> Start';
+});
+btnReset.addEventListener('click',()=>{
+  clearTimeout(animTimeout);isRunning=false;isPaused=false;stepIndex=0;sortedUpTo=Infinity;resetStats();
+  array=shuffle(generateArray(parseInt(sliderSize.value)));drawArray(array,[],[],Infinity);
+  btnStart.innerHTML='<span class="btn-icon">▶</span> Start';
+  btnStart.disabled=false;btnReset.disabled=true;btnShuffle.disabled=false;sliderSize.disabled=false;
+});
+sliderSize.addEventListener('input',()=>{
+  if(isRunning)return;
+  labelSize.textContent=sliderSize.value;
+  array=shuffle(generateArray(parseInt(sliderSize.value)));
+  sortedUpTo=Infinity;resetStats();drawArray(array,[],[],Infinity);
+});
+sliderSpeed.addEventListener('input',()=>{labelSpeed.textContent=sliderSpeed.value;});
+window.addEventListener('resize',resizeCanvas);
+array=shuffle(generateArray(parseInt(sliderSize.value)));
+resizeCanvas();drawArray(array,[],[],Infinity);resetStats();
+  </script>
+</body>
+</html>
