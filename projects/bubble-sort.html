@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗿</text></svg>">
+  <title>Sorting Visualizer</title>
+  <style>
+    /* ─── Variables ─────────────────────────────────────────── */
+    :root {
+      --bg:          #0d0d0d;
+      --card-bg:     rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.10);
+      --card-hover:  rgba(255, 255, 255, 0.08);
+      --text:        #ffffff;
+      --text-muted:  rgba(255, 255, 255, 0.40);
+      --accent:      #7a3fc0;
+      --accent-hover:#8f4fd6;
+      --radius:      12px;
+      --transition:  0.25s ease;
+    }
+
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 28px 40px 60px;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    /* ─── Noise Overlay ─────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.12;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* ─── Nav ───────────────────────────────────────────────── */
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      display: inline-block;
+      padding: 10px 26px;
+      border-radius: 999px;
+      font-size: 0.85em;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      text-decoration: none;
+      background: #1e1e1e;
+      color: var(--text);
+      transition: background var(--transition), transform var(--transition);
+    }
+
+    nav a:hover        { background: #2a2a2a; transform: scale(1.04); }
+    nav a.active       { background: var(--accent); color: #fff; }
+    nav a.active:hover { background: var(--accent-hover); }
+
+    /* ─── Page Title ────────────────────────────────────────── */
+    .page-title {
+      text-align: center;
+      font-size: clamp(1.8em, 4vw, 2.6em);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.95em;
+      margin-bottom: 40px;
+    }
+
+    /* ─── Top Layout: Info left, nothing right (full width below) */
+    .info-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      max-width: 1000px;
+      margin: 0 auto 20px;
+    }
+
+    /* ─── Info Box ──────────────────────────────────────────── */
+    .info-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      text-align: left;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    }
+
+    .info-box:hover {
+      background: var(--card-hover);
+      border-color: rgba(255, 255, 255, 0.20);
+      transform: translateY(-3px);
+    }
+
+    .info-box-label {
+      font-size: 0.7em;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-hover);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-box-label::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-hover);
+      flex-shrink: 0;
+    }
+
+    .info-box p {
+      color: var(--text-muted);
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    /* ─── Language Bar ──────────────────────────────────────── */
+    .lang-bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .lang-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .lang-legend { display: flex; flex-direction: column; gap: 5px; }
+
+    .lang-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85em;
+    }
+
+    .lang-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .lang-name { color: var(--text); }
+    .lang-pct  { color: var(--text-muted); }
+
+    /* ─── GitHub Button ─────────────────────────────────────── */
+    .github-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 24px;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      font-size: 1em;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      max-width: 1000px;
+      margin: 0 auto 20px;
+    }
+
+    .github-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 0 28px rgba(122, 63, 192, 0.40);
+    }
+
+    .github-btn svg {
+      width: 18px; height: 18px;
+      fill: currentColor; flex-shrink: 0;
+    }
+
+    /* ─── Demo Section ──────────────────────────────────────── */
+    .demo-section {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .demo-label {
+      font-size: 0.7em;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .demo-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--card-border);
+    }
+
+    .demo-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0, 0.2, 1);
+    }
+
+    .demo-box.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .demo-box iframe {
+      width: 100%;
+      height: 620px;
+      border: none;
+      display: block;
+    }
+
+    /* ─── Footer ────────────────────────────────────────────── */
+    footer {
+      margin-top: 60px;
+      color: var(--text-muted);
+      font-size: 0.85em;
+      text-align: center;
+    }
+
+    footer a {
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    footer a:hover { color: var(--text); }
+
+    /* ─── Responsive ────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .info-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../projects.html" class="active">Projects</a>
+    <a href="../about.html">About me</a>
+  </nav>
+
+  <h1 class="page-title">Sorting Visualizer</h1>
+  <p class="page-subtitle">Bubble Sort interaktiv visualisiert</p>
+
+  <!-- ─── Info Row ─────────────────────────────────────────── -->
+  <div class="info-row">
+
+    <div class="info-box">
+      <div class="info-box-label">Description</div>
+      <p>An interactive Bubble Sort visualizer. Watch the algorithm sort an array step by step in real time.</p>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-label">Features</div>
+      <p>
+        · Adjustable speed &amp; array size<br>
+        · Color-coded comparisons &amp; swaps<br>
+        · Step counter &amp; live stats
+      </p>
+    </div>
+
+    <div class="info-box" id="lang-box">
+      <div class="info-box-label">Languages</div>
+      <div class="lang-bar-track">
+        <div class="lang-bar-fill" style="background: #f1e05a;" data-width="60%"></div>
+      </div>
+      <div class="lang-bar-track" style="margin-top:6px;">
+        <div class="lang-bar-fill" style="background: #563d7c;" data-width="25%"></div>
+      </div>
+      <div class="lang-bar-track" style="margin-top:6px;">
+        <div class="lang-bar-fill" style="background: #3572A5;" data-width="15%"></div>
+      </div>
+      <div class="lang-legend" style="margin-top:8px;">
+        <div class="lang-item">
+          <div class="lang-dot" style="background:#f1e05a;"></div>
+          <span class="lang-name">JavaScript</span>
+          <span class="lang-pct">60%</span>
+        </div>
+        <div class="lang-item">
+          <div class="lang-dot" style="background:#563d7c;"></div>
+          <span class="lang-name">CSS</span>
+          <span class="lang-pct">25%</span>
+        </div>
+        <div class="lang-item">
+          <div class="lang-dot" style="background:#3572A5;"></div>
+          <span class="lang-name">HTML</span>
+          <span class="lang-pct">15%</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── GitHub Button ────────────────────────────────────── -->
+  <a class="github-btn" href="https://github.com/notRichtiger" target="_blank">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+    </svg>
+    GitHub ansehen
+  </a>
+
+  <!-- ─── Live Demo ─────────────────────────────────────────── -->
+  <div class="demo-section">
+    <div class="demo-label">Live Demo</div>
+    <div class="demo-box" id="demoBox">
+      <iframe src="../bubble-sort.html" title="Sorting Visualizer Demo" scrolling="no"></iframe>
+    </div>
+  </div>
+
+  <footer>
+    Made with love by <a href="https://github.com/notRichtiger" target="_blank">notRichtiger</a> · GitHub
+  </footer>
+
+  <script>
+    // ─── Language Bar Animation ───────────────────────────────
+    const langObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll('.lang-bar-fill').forEach(bar => {
+            bar.style.width = bar.dataset.width;
+          });
+          langObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+
+    langObserver.observe(document.getElementById('lang-box'));
+
+    // ─── Demo Slide-in ───────────────────────────────────────
+    const demoBox = document.getElementById('demoBox');
+    const demoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          demoBox.classList.add('visible');
+          demoObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    demoObserver.observe(demoBox);
+  </script>
+
+</body>
+</html>
