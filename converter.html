@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Converter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0d0f;
+      --surface:  #16161a;
+      --surface2: #1e1e24;
+      --border:   rgba(255,255,255,0.07);
+      --text:     #e8e8f0;
+      --muted:    #6b6b80;
+      --accent:   #a78bfa;
+      --accent2:  #7c3aed;
+      --radius:   14px;
+      --radius-sm:10px;
+    }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: transparent;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .wrapper { width: 100%; max-width: 340px; }
+
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+
+    .brand { font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+    .cats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+
+    .cat-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .cat-btn:hover { background: #2a2a35; color: var(--text); }
+    .cat-btn.on    { background: var(--accent2); color: #fff; border-color: transparent; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    }
+
+    .field-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .field-label  { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+    input[type="number"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      font-weight: 300;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="number"]:focus { border-color: var(--accent); }
+
+    select {
+      width: 100%;
+      background: #1e1e24;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: #e8e8f0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      padding: 10px 14px;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus { border-color: var(--accent); }
+    select option { background: #1e1e24; color: #e8e8f0; }
+
+    .swap-row { display: flex; justify-content: center; margin: 4px 0 12px; }
+
+    .swap-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.15s, color 0.15s, transform 0.15s;
+    }
+    .swap-btn:hover { background: #2a2a35; color: var(--text); transform: scale(1.08); }
+
+    .result {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      min-height: 54px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-top: 4px;
+    }
+    .result-val  { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 300; color: var(--text); line-height: 1.2; }
+    .result-unit { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="topbar"><span class="brand">Converter</span></div>
+  <div class="cats" id="cats"></div>
+  <div class="card">
+    <div class="field-group">
+      <div class="field-label">Von</div>
+      <input type="number" id="valIn" value="1" step="any">
+      <select id="unitFrom"></select>
+    </div>
+    <div class="swap-row">
+      <button class="swap-btn" id="swapBtn">&#8645;</button>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Nach</div>
+      <select id="unitTo"></select>
+    </div>
+    <div class="result">
+      <div class="result-val" id="resVal">--</div>
+      <div class="result-unit" id="resUnit"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var CATS = [
+  { key:"Laenge",  label:"Laenge",   display:"Länge",
+    units:["m","km","cm","mm","mi","yd","ft","in"],
+    names:["Meter","Kilometer","Zentimeter","Millimeter","Meile","Yard","Fuss","Zoll"],
+    base:[1,1000,0.01,0.001,1609.344,0.9144,0.3048,0.0254], temp:false },
+  { key:"Gewicht", label:"Gewicht",  display:"Gewicht",
+    units:["kg","g","mg","lb","oz","t"],
+    names:["Kilogramm","Gramm","Milligramm","Pfund","Unze","Tonne"],
+    base:[1,0.001,0.000001,0.453592,0.0283495,1000], temp:false },
+  { key:"Temp",    label:"Temp",     display:"Temp",
+    units:["C","F","K"],
+    names:["Celsius","Fahrenheit","Kelvin"],
+    base:null, temp:true },
+  { key:"Flaeche", label:"Flaeche", display:"Flaeche",
+    units:["m2","km2","cm2","ha","ac","ft2"],
+    names:["Quadratmeter","Quadratkm","Quadratzentim","Hektar","Acre","Quadratfuss"],
+    base:[1,1000000,0.0001,10000,4046.86,0.092903], temp:false },
+  { key:"Volumen", label:"Volumen", display:"Volumen",
+    units:["L","mL","m3","gal","floz","cup"],
+    names:["Liter","Milliliter","Kubikmeter","Gallon","Fl.Unze","Tasse"],
+    base:[1,0.001,1000,3.78541,0.0295735,0.236588], temp:false },
+  { key:"Speed",   label:"Speed",   display:"Speed",
+    units:["ms","kmh","mph","kn"],
+    names:["Meter/Sek","km/h","Meilen/Std","Knoten"],
+    base:[1,0.277778,0.44704,0.514444], temp:false },
+  { key:"Daten",   label:"Daten",   display:"Daten",
+    units:["B","KB","MB","GB","TB"],
+    names:["Byte","Kilobyte","Megabyte","Gigabyte","Terabyte"],
+    base:[1,1024,1048576,1073741824,1099511627776], temp:false }
+];
+
+var current = 0;
+
+function getCat() { return CATS[current]; }
+
+function buildCats() {
+  var el = document.getElementById("cats");
+  el.innerHTML = "";
+  for (var i = 0; i < CATS.length; i++) {
+    var b = document.createElement("button");
+    b.className = "cat-btn" + (i === current ? " on" : "");
+    b.textContent = CATS[i].display;
+    b.setAttribute("data-i", i);
+    b.onclick = function() {
+      current = parseInt(this.getAttribute("data-i"));
+      buildCats();
+      buildUnits();
+      doConvert();
+    };
+    el.appendChild(b);
+  }
+}
+
+function buildUnits() {
+  var c = getCat();
+  var selF = document.getElementById("unitFrom");
+  var selT = document.getElementById("unitTo");
+  selF.innerHTML = "";
+  selT.innerHTML = "";
+  for (var j = 0; j < c.units.length; j++) {
+    var oF = document.createElement("option");
+    oF.value = j;
+    oF.textContent = c.names[j] + " (" + c.units[j] + ")";
+    selF.appendChild(oF);
+    var oT = document.createElement("option");
+    oT.value = j;
+    oT.textContent = c.names[j] + " (" + c.units[j] + ")";
+    selT.appendChild(oT);
+  }
+  selF.selectedIndex = 0;
+  selT.selectedIndex = 1;
+}
+
+function convertTemp(val, from, to) {
+  var cel;
+  if (from === 0) cel = val;
+  else if (from === 1) cel = (val - 32) * 5 / 9;
+  else cel = val - 273.15;
+  if (to === 0) return cel;
+  if (to === 1) return cel * 9 / 5 + 32;
+  return cel + 273.15;
+}
+
+function fmt(n) {
+  if (!isFinite(n)) return "--";
+  if (Math.abs(n) >= 1000000000 || (Math.abs(n) < 0.0001 && n !== 0)) return n.toExponential(4);
+  return parseFloat(n.toPrecision(7)).toLocaleString("de-DE", {maximumFractionDigits:6});
+}
+
+function doConvert() {
+  var c   = getCat();
+  var val = parseFloat(document.getElementById("valIn").value);
+  var fi  = parseInt(document.getElementById("unitFrom").value);
+  var ti  = parseInt(document.getElementById("unitTo").value);
+  if (isNaN(val)) { document.getElementById("resVal").textContent = "--"; document.getElementById("resUnit").textContent = ""; return; }
+  var res = c.temp ? convertTemp(val, fi, ti) : val * c.base[fi] / c.base[ti];
+  document.getElementById("resVal").textContent  = fmt(res);
+  document.getElementById("resUnit").textContent = c.names[ti] + " (" + c.units[ti] + ")";
+}
+
+document.getElementById("valIn").addEventListener("input", doConvert);
+document.getElementById("unitFrom").addEventListener("change", doConvert);
+document.getElementById("unitTo").addEventListener("change", doConvert);
+document.getElementById("swapBtn").addEventListener("click", function() {
+  var f = document.getElementById("unitFrom");
+  var t = document.getElementById("unitTo");
+  var tmp = f.selectedIndex;
+  f.selectedIndex = t.selectedIndex;
+  t.selectedIndex = tmp;
+  doConvert();
+});
+
+buildCats();
+buildUnits();
+doConvert();
+</script>
+</body>
+</html>
